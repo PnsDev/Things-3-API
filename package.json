@@ -1,8 +1,12 @@
 {
-  "name": "testwebsocket",
+  "name": "Things3API",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
     "bun-types": "^0.4.0"
+  },
+  "dependencies": {
+    "aes256": "^1.1.0",
+    "xcall": "^1.0.4"
   }
 }
