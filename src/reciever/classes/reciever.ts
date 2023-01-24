@@ -1,8 +1,8 @@
 const aes256 = require("aes256");
 import { randomUUID } from "crypto";
-import Message from "../../types/message.ts";
 import { checkInternet } from "../../utils/webUtils.ts";
 import Router from "./router.ts";
+import Message from "../../classes/message.ts";
 
 export default class Reciever {
   private socket: WebSocket | undefined;
@@ -37,11 +37,11 @@ export default class Reciever {
     this.socket.addEventListener("open", (event) => {
       if (!this.socket) return;
 
-      const message: Message = {
+      const message: Message = new Message({
         ID: randomUUID(),
         method: "Auth",
         data: Bun.env.SECRET,
-      };
+      });
 
       this.socket.send(aes256.encrypt(Bun.env.SECRET, JSON.stringify(message)));
     });
@@ -52,7 +52,7 @@ export default class Reciever {
 
       try {
         const message: string = aes256.decrypt(event.data, Bun.env.SECRET);
-        this.router.route(this.socket, JSON.parse(message) as Message);
+        this.router.route(this.socket, Message.fromJSON(message));
       } catch (e) {
         // Kill process if it can't decrypt the messages
         console.error("Failed to decrypt message: %s", e);
