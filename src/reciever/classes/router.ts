@@ -1,9 +1,9 @@
-import Message from "../../classes/message.ts";
+import Message, { MessageMethod } from "../../classes/message.ts";
 import { goBackDir, iterateDir } from "../../utils/miscUtils.ts";
 import chalk from 'chalk';
 
 export default class Router {
-    private paths: Map<string, (socket: WebSocket, message: string) => void> = new Map();
+    private paths: Map<MessageMethod, (message: Object, socket?: WebSocket) => void> = new Map();
 
     constructor() {
         console.log('Initializing router...');
@@ -11,9 +11,9 @@ export default class Router {
         console.log('Router initialized!')
     }
 
-    public route(socket: WebSocket, message: Message) {
-        const func = this.paths.get(message.method.toLowerCase());
-        if (func) return func(socket, message.data);
+    public route(message: Message, socket?: WebSocket) {
+        const func = this.paths.get(message.method);
+        if (func) return func(message.data, socket);
         // TODO: Handle invalid method
     }
 
@@ -35,11 +35,11 @@ export default class Router {
     
             try {
                 // Import the route file
-                const route: (socket: WebSocket, message: string) => void | undefined = require(path + '').default;
+                const route: (message: Object, socket?: WebSocket) => void | undefined = require(path + '').default;
                 if (route === undefined) return process.stdout.write(`\r[${chalk.blueBright('SKIP')}] Skipped router path: ${pathName}`);
     
                 // Save the route
-                this.paths.set(pathName, route);
+                this.paths.set((<any> MessageMethod)[pathName], route);
                 process.stdout.write(`\r[${chalk.greenBright('OK')}] Loaded router path: ${pathName}                      `);
             } catch (ex) {
                 // Log failure

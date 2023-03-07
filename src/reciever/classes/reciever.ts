@@ -39,8 +39,7 @@ export default class Reciever {
 
       const message: Message = new Message({
         ID: randomUUID(),
-        method: "Auth",
-        data: Bun.env.SECRET,
+        method: "Auth"
       });
 
       this.socket.send(aes256.encrypt(Bun.env.SECRET, JSON.stringify(message)));
@@ -52,7 +51,7 @@ export default class Reciever {
 
       try {
         const message: string = aes256.decrypt(event.data, Bun.env.SECRET);
-        this.router.route(this.socket, Message.fromJSON(message));
+        this.router.route(Message.fromJSON(message), this.socket);
       } catch (e) {
         // Kill process if it can't decrypt the messages
         console.error("Failed to decrypt message: %s", e);

@@ -1,5 +1,6 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
+import * as child from "child_process";
 
 /**
  * Returns the path to nested files inside the folder
@@ -8,15 +9,15 @@ import path from 'path';
  * @returns The array of files
  */
 export function iterateDir(dir: string, files: string[] = []): string[] {
-    fs.readdirSync(dir).forEach((file) => {
-        const filePath = path.join(dir, file);
-        const stat = fs.statSync(filePath);
+  fs.readdirSync(dir).forEach((file) => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
 
-        if (stat.isDirectory()) iterateDir(filePath, files);
-        else files.push(filePath);
-    });
-    return files;
-};
+    if (stat.isDirectory()) iterateDir(filePath, files);
+    else files.push(filePath);
+  });
+  return files;
+}
 
 /***
  * Returns the path to the parent directory
@@ -25,8 +26,8 @@ export function iterateDir(dir: string, files: string[] = []): string[] {
  * @returns The path to the parent directory
  */
 export function goBackDir(dir: string, times: number) {
-    for (let i = 0; i < times; i++) {
-        dir = path.dirname(dir);
-    }
-    return dir;
+  for (let i = 0; i < times; i++) {
+    dir = path.dirname(dir);
+  }
+  return dir;
 }
