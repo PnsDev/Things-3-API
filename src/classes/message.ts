@@ -1,6 +1,6 @@
 export default class Message {
     ID: string;
-    method: string;
+    method: MessageMethod;
     data?: any;
 
     constructor(json: any) {
@@ -34,3 +34,14 @@ export default class Message {
         socket.send(message.toJSON());
     }
 }
+
+export enum MessageMethod {
+    GET_TASK, //GET_PROJECT, GET_AREA,
+    UPDATE_TASK, //UPDATE_PROJECT, UPDATE_AREA,
+    CREATE_TASK, //CREATE_PROJECT, CREATE_AREA,
+    DELETE_TASK, //DELETE_PROJECT, DELETE_AREA
+    AUTH,
+    RESPONSE,
+    PING,
+    PONG
+};
