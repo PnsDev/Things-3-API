@@ -13,7 +13,7 @@ export default class Router {
 
     public route(message: Message, socket?: WebSocket) {
         const func = this.paths.get(message.method);
-        if (func) return func(message.data, socket);
+        if (func) return func(message, socket);
         // TODO: Handle invalid method
     }
 
