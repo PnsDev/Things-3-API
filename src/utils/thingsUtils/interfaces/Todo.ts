@@ -4,6 +4,7 @@ import ChecklistItem from "./ChecklistItem.ts";
 
 export default class Todo {
     readonly type: string = "to-do"; // "to-do"
+    operation?: string;
     attributes: {
         title: string;
         notes?: string;
