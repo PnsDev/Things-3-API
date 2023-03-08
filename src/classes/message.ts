@@ -1,3 +1,5 @@
+const aes256 = require("aes256");
+
 export default class Message {
     ID: string;
     method: MessageMethod;
@@ -27,11 +29,13 @@ export default class Message {
     public respond(socket: WebSocket, data: any) {
         const message = new Message({
             ID: this.ID,
-            method: "Response",
+            method: MessageMethod.RESPONSE,
             data: data,
         });
+        let json = message.toJSON();
 
-        socket.send(message.toJSON());
+        // Encrypt the message and send
+        socket.send(aes256.encrypt(Bun.env.SECRET, json));
     }
 }
 
