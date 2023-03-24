@@ -2,7 +2,7 @@ const aes256 = require("aes256");
 import { randomUUID } from "crypto";
 import { checkInternet } from "../../utils/webUtils.ts";
 import Router from "./router.ts";
-import Message from "../../classes/message.ts";
+import Message, { MessageMethod } from "../../classes/message.ts";
 
 export default class Reciever {
   private socket: WebSocket | undefined;
@@ -39,7 +39,7 @@ export default class Reciever {
 
       const message: Message = new Message({
         ID: randomUUID(),
-        method: "Auth"
+        method: MessageMethod.AUTH
       });
 
       this.socket.send(aes256.encrypt(Bun.env.SECRET, JSON.stringify(message)));

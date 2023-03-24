@@ -1,6 +1,9 @@
+import { writeFile } from "fs/promises";
+import { executeXCallBackURL, generateCallBackURL } from "../../xcall/xCallUtils.ts";
 import { When } from "../enums.ts";
 import { isDateStr, isDateTimeStr } from "../propertyValidators.ts";
 import ChecklistItem from "./ChecklistItem.ts";
+import * as exec from "async-exec";
 
 export default class Todo {
     readonly type: string = "to-do"; // "to-do"
@@ -23,6 +26,26 @@ export default class Todo {
     private constructor(json: any) {
         this.attributes = json.attributes;
         // This might load more attributes than we want but it doesn't seem to be a problem
+    }
+
+    /**
+     * Adds the Todo to Things
+     * @param stealth If true, it will be added to things through a shortcut without opening the app
+     * @returns Returns the ID of the Todo if it was added to Things
+     */
+    async addToThings(stealth: boolean = false): Promise<string> {
+        let url = generateCallBackURL("things", "json", {data: [this]});
+        if (!stealth) {
+            let res: string[] = (await executeXCallBackURL(url)).split(": ");
+            if (res[0] !== "Success" || !res[1].startsWith("x-things-ids=")) throw new Error(res[1]);
+            return res[1].replace("x-things-ids=", "");
+        }
+        //TODO: add some sort of schedule system
+        await writeFile("/Users/jcasas/Library/Caches/dev.pns/url.txt", url);
+        // @ts-ignore
+        let res = exec.default(`shortcuts run "Things 3 API Stealth Mode" -i /Users/jcasas/Library/Caches/dev.pns/url.txt ; echo "Done"`);
+        //TODO: grab id from DB
+        return res;
     }
     
     static isTodo(object: any): Todo {
@@ -49,6 +72,4 @@ export default class Todo {
     
         return new Todo(object);
     }
-    
-    
 }

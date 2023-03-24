@@ -2,7 +2,7 @@ import * as exec from "async-exec";
 
 const xcall = `${import.meta.dir}/CallbackCLI`;
 
-export function executeXCallBackURL(
+export function generateCallBackURL(
   scheme: string,
   action: string,
   params: any
@@ -17,7 +17,11 @@ export function executeXCallBackURL(
     }
   }
   result = result.slice(0, -1); // remove last &
-  let url = `${scheme}://x-callback-url/${action}?${result}`;
+  return `${scheme}://x-callback-url/${action}?${result}`;
+}
+
+
+export async function executeXCallBackURL(url: string) {
   //@ts-ignore
-  return exec.default(`${xcall} "${url}"`);
+  return (await exec.default(`${xcall} "${url}"`)) + "";
 }
