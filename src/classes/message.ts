@@ -15,8 +15,7 @@ export default class Message {
     }
 
     public static fromJSON(json: string): Message {
-        // wtf is this
-        return new Message(JSON.parse(JSON.parse(json)));
+        return new Message(JSON.parse(json));
     }
 
     public toJSON(): string {

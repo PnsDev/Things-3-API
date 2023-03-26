@@ -1,16 +1,16 @@
 const aes256 = require("aes256");
-const logger = require('signale');
+const {Signale} = require('signale');
 
-import { Server, ServerWebSocket } from "bun";
 import Message, { MessageMethod } from "../../classes/message.ts";
 import { IdentifiedSocket } from "./IdentifiedSocket.ts";
 
 export class WebServer {
   private unAuthedSockets: IdentifiedSocket[] = [];
   private clientSocket: IdentifiedSocket | null = null;
+  private readonly logger = new Signale({scope: 'web_server',});
 
   constructor() {
-    logger.info("Starting web server...");
+    this.logger.info("Starting web server...");
     Bun.serve({
       websocket: {
         open: (ws) => { // When a socket opens
@@ -58,8 +58,17 @@ export class WebServer {
 
   private handleMessage(ws: IdentifiedSocket, msg: string | Uint8Array) {
     try { // Decrypt the message and check if it's an auth message
-      let temp = aes256.decrypt(Bun.env.SECRET, msg);
-      const decryptedMsg = Message.fromJSON(temp);
+
+      let decryptedStr;
+      try { // Try to decrypt the message
+        decryptedStr = JSON.parse(aes256.decrypt(Bun.env.SECRET, msg));
+      } catch(e) { // Kill the connection if it can't decrypt the message
+        ws.log.warn("Socket sent a non encrypted message");
+        ws.socket.close(); 
+        return;
+      }
+
+      const decryptedMsg = Message.fromJSON(decryptedStr);
 
       // Kill the connection if it's not authed and it's not an auth message
       if (decryptedMsg.method !== MessageMethod.AUTH && this.clientSocket !== ws) {
@@ -89,9 +98,7 @@ export class WebServer {
         }
       }
     } catch (e) { 
-      logger.error(e);
-      ws.log.warn("Socket sent a non encrypted message");
-      ws.socket.close(); 
-    } // Kill the connection if it can't decrypt the message
+      this.logger.error(e);
+    }
   }
 }
