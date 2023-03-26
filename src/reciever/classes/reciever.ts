@@ -11,20 +11,16 @@ export default class Reciever {
 
   constructor(connectionURL: string) {
     this.conectionURL = connectionURL;
-    this.reconnect();
+    this.connect();
   }
 
   /**
    * Connects to the server
    */
-  private connect(): boolean {
-    try {
-      this.socket = new WebSocket(this.conectionURL);
-      this.registerEvents();
-      return true;
-    } catch (e) {
-      return false;
-    }
+  private connect() {
+    console.log("Connecting to server...")
+    this.socket = new WebSocket(this.conectionURL);
+    this.registerEvents();
   }
 
   /**
@@ -60,23 +56,8 @@ export default class Reciever {
     });
 
     // Listen for messages
-    this.socket.addEventListener("close", this.reconnect);
-  }
-
-  /**
-   * Reconnects to the server if the connection is lost
-   */
-  private async reconnect() {
-    let failedConnectionAttempts = 0;
-    while (!this.connect()) {
-      failedConnectionAttempts++;
-      if (failedConnectionAttempts == 7) {
-        console.error(
-          "Failed to connect to server after 7 attempts. Exiting..."
-        );
-        process.exit(1);
-      }
-
+    this.socket.addEventListener("close", async () => {
+      console.log('Connection closed, reconnecting in 1 min...')
       // Check if there's an internet connection. if not wait 4 mins
       while (await !checkInternet()) {
         console.log("Waiting for internet connection...");
@@ -85,9 +66,7 @@ export default class Reciever {
 
       // Wait 1 min before trying to reconnect
       await new Promise((resolve) => setTimeout(resolve, 60000));
-    }
+      this.connect();
+    });
   }
-
-  // TODO: do we really need this?
-  private removeEvents() {}
 }
